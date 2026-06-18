@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Engineering Assist v2.0</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
+  <style>
+    body { font-family: 'Segoe UI', system-ui, sans-serif; }
+    .hero-bg { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <header class="hero-bg text-white py-6 shadow-lg">
+      <div class="container mx-auto px-6">
+        <h1 class="text-4xl font-bold flex items-center gap-3">
+          <i class="fas fa-tools"></i> Engineering Assist
+        </h1>
+        <p class="mt-2 text-blue-100">Lightweight • Offline • Domain-Specific RAG for Engineers</p>
+      </div>
+    </header>
+
+    <div class="container mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+      <!-- ==================== SECTION 1: QUERY + FILES ==================== -->
+      <div class="bg-white rounded-2xl shadow-xl p-8">
+        <h2 class="text-2xl font-semibold mb-6 flex items-center gap-3">
+          <i class="fas fa-search text-blue-600"></i> Ask Question
+        </h2>
+        <p class="text-gray-600 mb-6">Query with or without files (PDF, Image, DOCX supported)</p>
+
+        <form id="queryForm" class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Your Question</label>
+            <textarea id="queryInput" rows="3"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Type here......  "></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Attach Files (Optional)</label>
+            <input type="file" id="queryFiles" multiple accept=".pdf,.jpg,.jpeg,.png,.tiff,.docx,.txt"
+              class="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+          </div>
+
+          <button type="submit"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-xl transition-all flex items-center justify-center gap-3">
+            <i class="fas fa-paper-plane"></i> Ask Engineering Assist
+          </button>
+        </form>
+
+        <div id="queryResult" class="mt-8 hidden"></div>
+      </div>
+
+      <!-- ==================== SECTION 2: UPLOAD FOR PRETRAINING ==================== -->
+      <div class="bg-white rounded-2xl shadow-xl p-8">
+        <h2 class="text-2xl font-semibold mb-6 flex items-center gap-3 text-amber-600">
+          <i class="fas fa-database"></i> Upload for Pretraining
+        </h2>
+        <p class="text-gray-600 mb-6">
+          Phase 2: Upload domain documents (Manuals, Drawings, Safety Guidelines, SOPs) to improve model understanding.
+        </p>
+
+        <form id="pretrainForm" class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Upload Training Documents</label>
+            <input type="file" id="pretrainFiles" multiple accept=".pdf,.docx,.txt,.jpg,.png"
+              class="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100"/>
+          </div>
+
+          <button type="submit"
+            class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-4 rounded-xl transition-all flex items-center justify-center gap-3">
+            <i class="fas fa-upload"></i> Upload for Domain Training (Phase 2)
+          </button>
+        </form>
+
+        <div class="mt-8 p-5 bg-amber-50 border border-amber-200 rounded-xl text-sm">
+          <p class="font-medium text-amber-800">Note:</p>
+          <ul class="list-disc list-inside text-amber-700 space-y-1 mt-2">
+            <li>These documents will be used to fine-tune the embedding model in Phase 2</li>
+            <li>Supports large collections of technical manuals & drawings</li>
+            <li>Currently in preview mode</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Query Form
+    document.getElementById('queryForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const resultDiv = document.getElementById('queryResult');
+      resultDiv.classList.remove('hidden');
+      resultDiv.innerHTML = `<p class="text-blue-600 font-medium">Processing your query...</p>`;
+      
+      // Simulate response (replace with actual fetch to FastAPI later)
+      setTimeout(() => {
+        resultDiv.innerHTML = `
+          <div class="bg-green-50 border border-green-200 rounded-2xl p-6">
+            <h3 class="font-semibold text-green-800 mb-3">Response</h3>
+            <p class="text-gray-700">Your answer will appear here after connecting to backend...</p>
+          </div>
+        `;
+      }, 1500);
+    });
+
+    // Pretrain Form
+    document.getElementById('pretrainForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert("✅ Files received for Phase 2 Pretraining.\n\nThis feature will be active in the next phase.");
+    });
+  </script>
+</body>
+</html>

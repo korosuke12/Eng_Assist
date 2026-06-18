@@ -1,0 +1,57 @@
+# Core
+python-dotenv
+pydantic
+
+# Document Parsing
+pdfplumber
+python-docx
+pymupdf
+
+# OCR
+pytesseract
+Pillow
+
+# Chunking & RAG
+langchain
+langchain-text-splitters
+
+# Embeddings
+sentence-transformers
+torch
+transformers
+
+# Vector Database
+chromadb
+
+# Retrieval
+rank-bm25
+numpy
+scikit-learn
+
+# Reranking
+sentence-transformers
+
+# Workflow / Graph
+langgraph
+langchain-core
+
+# API (optional)
+fastapi
+uvicorn
+
+# UI (optional)
+streamlit
+
+# Data Handling
+pandas
+
+# Logging
+loguru
+
+# Evaluation
+ragas
+datasets
+
+# Utilities
+tqdm
+joblib
