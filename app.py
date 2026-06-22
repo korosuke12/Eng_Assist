@@ -1,10 +1,10 @@
-# app.py
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from main import ingest_documents, ask_question
 import shutil
 from pathlib import Path
+import uvicorn
 
 app = FastAPI(title="Engineering Assist - Multimodal")
 
@@ -35,19 +35,22 @@ async def ingest_files(files: list[UploadFile] = File(...)):
     
     return {
         "status": "success",
-        "files_uploaded": len(saved_paths),
+        "files": [f.name for f in files],
         "chunks_created": len(result.get("chunks", [])),
         "message": "Files processed successfully. You can now ask questions."
     }
 
 
 @app.post("/query")
-async def query(query: str, use_reranker: bool = True):
+async def query_page(query: str, use_reranker: bool = True):
     result = ask_question(query, use_reranker)
     
     return {
         "query": query,
         "answer": result.get("response", "No relevant information found."),
-        "sources": len(result.get("retrieved_docs", [])),
+        "sources": len(result.get("retrieved_document", [])),
         "status": result.get("status")
     }
+
+if __name__ == "__main__":
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
