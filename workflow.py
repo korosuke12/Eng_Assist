@@ -14,7 +14,7 @@ from nodes.retrieval.reranker import reranker_node
 
 # Response
 from nodes.response.citation import citation_builder_node
-from nodes.response.generator import response_generator
+from nodes.response.generator import response_node
 
 
 def build_graph():
@@ -29,7 +29,7 @@ def build_graph():
     workflow.add_node("hybrid_retrieval", hybrid_retrieval_node)
     workflow.add_node("reranker", reranker_node)
     workflow.add_node("citation", citation_builder_node)
-    workflow.add_node("generator", response_generator)
+    workflow.add_node("generator", response_node)
 
     # Conditional Routing
     def routing(state):
