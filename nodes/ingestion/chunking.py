@@ -33,7 +33,7 @@ def chunking_node(state: GraphState):
                   "page": page.get("page", 1),
                   "source": page.get("source", "unknown"),
                   "type": page.get("type", "text"),
-                  "image": page.get("image_path"),
+                  "image": page.get("images")or "",
                   "chunk_length": len(chunk)
               })
               chunk_id += 1
