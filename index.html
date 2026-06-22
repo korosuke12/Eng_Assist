@@ -20,7 +20,7 @@
         <h1 class="text-4xl font-bold flex items-center gap-3">
           <i class="fas fa-tools"></i> Engineering Assist
         </h1>
-        <p class="mt-2 text-blue-100">Lightweight • Offline • Domain-Specific RAG for Engineers</p>
+        <p class="mt-2 text-blue-100">Domain-Specific RAG for Engineers</p>
       </div>
     </header>
 
@@ -95,26 +95,68 @@
     // Query Form
     document.getElementById('queryForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const resultDiv = document.getElementById('queryResult');
-      resultDiv.classList.remove('hidden');
-      resultDiv.innerHTML = `<p class="text-blue-600 font-medium">Processing your query...</p>`;
       
-      // Simulate response (replace with actual fetch to FastAPI later)
-      setTimeout(() => {
+      const query = document.getElementById('queryInput').value.trim();
+      const files = document.getElementById('queryFiles').files;
+      const resultDiv = document.getElementById('queryResult');
+      
+      resultDiv.classList.remove('hidden');
+      resultDiv.innerHTML = `<p class="text-blue-600">Processing your request...</p>`;
+
+      const formData = new FormData();
+      formData.append('query', query);
+      
+      // Add files if any
+      for (let file of files) {
+        formData.append('files', file);
+      }
+
+      try {
+        const response = await fetch('/query', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+        
         resultDiv.innerHTML = `
           <div class="bg-green-50 border border-green-200 rounded-2xl p-6">
-            <h3 class="font-semibold text-green-800 mb-3">Response</h3>
-            <p class="text-gray-700">Your answer will appear here after connecting to backend...</p>
+            <h3 class="font-semibold text-green-800 mb-3">Answer</h3>
+            <p class="text-gray-700 whitespace-pre-wrap">${data.answer}</p>
+            <p class="text-sm text-gray-500 mt-4">Sources: ${data.sources_count}</p>
           </div>
         `;
-      }, 1500);
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="text-red-600">Error: ${error.message}</p>`;
+      }
     });
 
     // Pretrain Form
-    document.getElementById('pretrainForm').addEventListener('submit', (e) => {
+    document.getElementById('pretrainForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      alert("✅ Files received for Phase 2 Pretraining.\n\nThis feature will be active in the next phase.");
+      const files = document.getElementById('pretrainFiles').files;
+      
+      if (files.length === 0) {
+        alert("Please select files to upload.");
+        return;
+      }
+
+      const formData = new FormData();
+      for (let file of files) {
+        formData.append('files', file);
+      }
+
+      try {
+        const response = await fetch('/ingest', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+        alert(`${data.message}\nChunks created: ${data.chunks_created}`);
+      } catch (error) {
+        alert("Upload failed. Please check console.");
+      }
     });
-  </script>
+</script>
 </body>
 </html>
