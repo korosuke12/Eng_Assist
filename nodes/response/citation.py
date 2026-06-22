@@ -16,16 +16,13 @@ def citation_builder_node(state: GraphState):
                 "source": source,
                 "page": page,
                 "chunk_id": chunk_id,
-                "score": round(doc.get("final_score", doc.get("score", 0.0)), 4)
+                "final_score": round(doc.get("final_score", 0.0), 4),
+                "rerank_score": round(doc.get("rerank_score", 0.0), 4),
             })
 
         state["citations"] = citations
         state["status"] = f"Built {len(citations)} citations"
         logger.info(f"Citation builder completed: {len(citations)} citations")
-        for i, doc in enumerate(retrieved_docs):
-            print(f"\nResult {i+1}")
-            print(doc.get("chunk", "")[:300])
-        return state
 
     except Exception as e:
         logger.error(f"Citation builder failed: {e}")
