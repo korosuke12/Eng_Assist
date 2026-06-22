@@ -8,13 +8,12 @@ class EmbeddingModel:
     def __init__(self):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model_name = "mixedbread-ai/mxbai-embed-xsmall-v1"
-        self.model.to(self.device)
         self.model = None
 
     def load(self):
         if self.model is None:
             try:
-                self.model = SentenceTransformer(self.model_name, device="cpu")
+                self.model = SentenceTransformer(self.model_name, device=self.device)
                 logger.info(f"Successfully loaded {self.model_name}")
             except Exception as e:
                 logger.error(f"Failed to load model {self.model_name}: {e}")
@@ -22,7 +21,6 @@ class EmbeddingModel:
         return self.model
 
     def encode(self, texts):
-        """Safe encode method"""
         if not texts:
             return []
         
@@ -30,7 +28,7 @@ class EmbeddingModel:
             model = self.load()
             embeddings = model.encode(
                 texts, 
-                convert_to_tensor=True), 
+                convert_to_tensor = True, 
                 show_progress_bar=False,
                 batch_size=32
             ).cpu().numpy()
