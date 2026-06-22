@@ -25,15 +25,15 @@ def reranker_node(state: GraphState):
             overlap = len(query_words & chunk_words) / max(len(query_words), 1)
 
             original_score = item.get("final_score", item.get("score", 0.0))
-            item["rerank_score"] = original_score * (0.7 + 0.3 * overlap)
+            item["rerank_score"] = original_score * (0.65 + 0.35 * overlap)
 
         # Sort by rerank score
         retrieved_docs = sorted(retrieved_docs,key=lambda x: x.get("rerank_score", 0.0), reverse=True)
 
         # Keep top results
         state["retrieved_document"] = retrieved_docs[:15]
-        top_score = retrieved_docs[0].get("score", 0)
-        if top_score < 0.5:  # adjust threshold
+        top_score = retrieved_docs[0].get("rerank_score", 0)
+        if top_score < 0.3:  
             state["response"] = "No relevant information found in the uploaded documents."
             state["status"] = "Low relevance"
             return state
@@ -42,7 +42,6 @@ def reranker_node(state: GraphState):
         
     except Exception as e:
         logger.error(f"Reranker failed: {e}")
-        # Fallback: keep original results
         retrieved_docs = state.get("retrieved_document", [])
         state["retrieved_document"] = retrieved_docs[:15]
     return state
