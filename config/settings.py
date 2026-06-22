@@ -10,7 +10,6 @@ load_dotenv(dotenv_path=env_path)
 #load_dotenv()
 
 # Base directories
-# Use os.getcwd() for Colab compatibility as __file__ is not defined in interactive sessions
 BASE_DIR = Path(os.getcwd())
 DATA_DIR = BASE_DIR / "data"
 CHROMA_DB_PATH = BASE_DIR / "chroma_db"
@@ -72,4 +71,3 @@ REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 print("Settings loaded successfully")
 print(f"Embedding Model : {EMBEDDING_MODEL}")
 print(f"Chroma Path     : {CHROMA_DB_PATH}")
-print(f"Device          : {DEVICE}")
