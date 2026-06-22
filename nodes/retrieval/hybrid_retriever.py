@@ -23,10 +23,12 @@ def hybrid_retrieval_node(state: GraphState) -> GraphState:
             dense_distances = vector_results.get("distances", [[]])[0]
 
             for i, doc in enumerate(dense_docs):
-                dense_score = 1.0 / (1.0 + dense_distances[i]) if i < len(dense_distances) else 0.5
+                meta = dense_metadatas[i] if i < len(dense_metadatas) else {}
+                distance = dense_distances[i] if i < len(dense_distances) else 1.0
+                dense_score = 1.0 / (1.0 + distance)
                 retrieved.append({
                     "chunk": doc,
-                    "metadata": dense_metadatas[i] if i < len(dense_metadatas) else {},
+                    "metadata": meta,
                     "dense_score": dense_score,
                     "bm25_score": 0.0
                 })
@@ -35,38 +37,39 @@ def hybrid_retrieval_node(state: GraphState) -> GraphState:
             logger.warning(f"Dense retrieval failed: {e}")
 
         # ==================== BM25  ====================
-        chunks = state.get("chunks", [])
-        if chunks:
-            try:
-                tokenized = [c.lower().split() for c in chunks]
-                bm25 = BM25Okapi(tokenized)
-                scores = bm25.get_scores(query.lower().split())
-
-                for i, score in enumerate(scores):
-                    if score > 0.1:
-                        retrieved.append({
-                            "chunk": chunks[i],
-                            "metadata": state.get("chunk_metadata", [{}])[i],
+        try:
+          doc_data = vector_store.get_collection().get()['documents']
+          if doc_data and len(doc_data) > 0:
+            tokenized = [doc.lower().split() for doc in doc]
+            query_tokens = query.lower().split()
+            bm25 = BM25Okapi(tokenized)
+            bm25_scores = bm25.get_scores(query_tokens)
+            metadatas = vector_store.get_collection().get()['metadatas']
+            for i, score in enumerate(bm25_scores):
+              if score > 0.5:
+                retrieved.append({
+                            "chunk": doc_data[i],
+                            "metadata": metadatas[i] if i < len(metadatas) else {},
                             "bm25_score": float(score),
                             "dense_score": 0.0
                         })
-            except:
-                pass
-
+        except Exception as e:
+            logger.warning(f"BM25 retrieval failed: {e}")
         # ==================== FUSION ====================
         combined = {}
         for item in retrieved:
-            key = item["chunk"][:180]
+            key = item["chunk"][:250].strip()
             if key not in combined:
                 combined[key] = item
             else:
-                combined[key]["dense_score"] = max(combined[key].get("dense_score", 0), item.get("dense_score", 0))
-                combined[key]["bm25_score"] = max(combined[key].get("bm25_score", 0), item.get("bm25_score", 0))
+                existing = combined[key]
+                existing["dense_score"] = max(existing.get("dense_score", 0), item.get("dense_score", 0))
+                existing["bm25_score"] = max(existing.get("bm25_score", 0), item.get("bm25_score", 0))
 
         # Final Score
         results = []
         for item in combined.values():
-            final_score = alpha * item.get("bm25_score", 0) + (1 - alpha) * item.get("dense_score", 0)
+            final_score = (alpha * item.get("bm25_score", 0)) + ((1 - alpha) * item.get("dense_score", 0))
             item["final_score"] = final_score
             results.append(item)
 
