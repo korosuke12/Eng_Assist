@@ -3,6 +3,8 @@ from workflow import build_graph
 from schemas.graph_state import GraphState
 from utils.logger import logger
 
+graph = build_graph()
+
 def ingest_documents(file_paths: list):
     logger.info(f"Starting ingestion for {len(file_paths)} files")
     
@@ -14,14 +16,13 @@ def ingest_documents(file_paths: list):
         "raw_text": "",
         "chunks": [],
         "chunk_metadata": [],
-        "retrieved_docs": [],
+        "retrieved_document": [],
         "use_reranker": True,
         "status": "",
         "error": None
     }
 
-    app = build_graph()
-    result = app.invoke(initial_state)
+    result = graph.invoke(initial_state)
     
     print(f"Ingestion Status: {result.get('status')}")
     print(f"Chunks created: {len(result.get('chunks', []))}")
@@ -35,24 +36,27 @@ def ask_question(query: str,file_paths :list = None,use_reranker: bool = True):
         "query": query,
         "file_paths": file_paths or [],
         "use_reranker": use_reranker,
+        "retrieved_document": [],
+        "status":"",
+        "error": None
     }
 
-    app = build_graph()
-    result = app.invoke(initial_state)
+    result = graph.invoke(initial_state)
 
-    print(f"\n🔍 Query: {query}")
+    print(f"\n Query: {query}")
     print(f"Status: {result.get('status')}")
     
     if result.get("retrieved_document"):
         print(f"Retrieved {len(result['retrieved_document'])} documents")
-        print(result.get("response", "No response generated")[:500] + "...")
+        print(result.get("response", "No response generated")[:800] + "...")
+        print("="*80)
     else:
         print("No relevant documents found.")
 
     return result
 
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
     print("Assist - Started\n")
     
     #Example 1: Ingest a document
@@ -61,3 +65,8 @@ if __name__ == "__main__":
 
     # Example 2: Ask a question
     ask_question("how to perform stress analysis")
+
+    # Example 3: Ask a question
+    # ask_question(
+    #     query="what is countertop",
+    #     file_paths=["data/uploads/soildworks_introduction.pdf"]
