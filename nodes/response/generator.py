@@ -1,26 +1,23 @@
-# nodes/response/generator.py
 from schemas.graph_state import GraphState
 from utils.logger import logger
 import re
 
 def clean_text(text: str) -> str:
-    """Clean messy PDF text"""
     if not text:
         return ""
-    # Remove page numbers and artifacts
     text = re.sub(r'\b\d+\b\s*$|\bPage\s+\d+\b', '', text)
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
 
-def response_generator(state: GraphState) -> GraphState:
+def response_node(state: GraphState):
     try:
         query = state.get("query") or state.get("original_query", "")
         retrieved_docs = state.get("retrieved_document", [])
 
         if not retrieved_docs:
             state["response"] = "Sorry, I couldn't find relevant information."
-            state["status"] = "No results found"
+            state["status"] = "No results found at response.py"
             return state
 
         # context
@@ -31,18 +28,17 @@ def response_generator(state: GraphState) -> GraphState:
             chunk = clean_text(doc.get("chunk") or doc.get("content", ""))
             meta = doc.get("metadata", {}) if isinstance(doc.get("metadata"), dict) else {}
 
-            if chunk:
+            if chunk and len(chunk) > 50:
                 context.append(chunk)
 
             sources.append({
                 "source": meta.get("source", "Unknown"),
                 "page": meta.get("page", "N/A")
             })
-            images_path = meta.get("image_path") or doc.get("image_path")
+            images_path = meta.get("image") or doc.get("image") or ""
             if images_path:
                     images.append(images_path)
-        answer = "\n\n".join(context)
-        #response
+        answer = "\n\n---\n\n".join(context)
         response = f"""response for your Query: {query}
 answer:
 
@@ -50,13 +46,12 @@ answer:
 
 Sources:
 """
-
         for i, src in enumerate(sources, 1):
             response += f"{i}. {src['source']} (Page {src['page']})\n"
 
         if images:
                 response += "\n**Related Images:**\n"
-                for img in images:
+                for img in images[:3]:
                     response += f"- ![Image]({img})\n"
         response += f"\n**Total Documents Used:** {len(retrieved_docs)}"
 
