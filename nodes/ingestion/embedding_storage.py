@@ -16,6 +16,18 @@ def embedding_storage_node(state: GraphState):
 
         logger.info(f"Embedding {len(chunks)}")
 
+        cleaned_metadata = []
+        for meta in chunk_metadata:
+            clean_meta = {}
+            for k, v in meta.items():
+                if v is None:
+                    if k in ["image"]:
+                        clean_meta[k] = ""
+                    else:
+                        clean_meta[k] = 0 if isinstance(v, (int, float)) else ""
+                else:
+                    clean_meta[k] = v
+            cleaned_metadata.append(clean_meta)
         metadata = []
         for i, chunk in enumerate(chunks):
           meta = chunk_metadata[i] if i < len(chunk_metadata) and isinstance(chunk_metadata[i], dict) else {}
@@ -26,7 +38,7 @@ def embedding_storage_node(state: GraphState):
                 "doc_name": os.path.basename(source),
                 "page": meta.get("page", 1),
                 "type": meta.get("type","text"),
-                "image": meta.get("image_path"),
+                "image": meta.get("image") or "",
                 "chunk_length": len(chunk)
             })
           # Store using updated vector_store
